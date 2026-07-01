@@ -31,19 +31,25 @@ You can also just copy a skill's `SKILL.md` into your agent's context, or drop t
 
 ## Connecting the GEOly MCP server
 
-Add the MCP server to your client with a token created in the GEOly app
-(**MCP & Tools → MCP → Create Token**):
+Point your MCP client at the hosted URL — **no token to paste**. On first connect the client
+runs the OAuth flow in your browser, where you pick the organization and the read/write scope:
 
 ```json
 {
   "mcpServers": {
     "geoly": {
-      "url": "https://app.geoly.ai/api/mcp",
-      "headers": { "Authorization": "Bearer geom_your_token" }
+      "url": "https://app.geoly.ai/api/mcp"
     }
   }
 }
 ```
+
+Config keys vary by client: Cursor and Claude Code use `url`, Windsurf uses `serverUrl`, VS Code
+uses `servers` with `"type": "http"`, and Claude Desktop bridges via `npx -y mcp-remote <url>`.
+On OpenAI Codex, install the plugin (`codex plugin add geoly-mcp@geoly`) — it authorizes on install.
+
+For headless / CI where no browser is available, a legacy **read-only** static token is still
+accepted as `Authorization: Bearer geom_…`.
 
 ## Contributing
 
