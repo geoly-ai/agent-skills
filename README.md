@@ -5,7 +5,7 @@ correctly — picking the right tool, following the org/brand discovery flow, qu
 KPI caliber, and avoiding metric-definition pitfalls.
 
 [GEOly](https://www.geoly.ai) is a GEO (Generative Engine Optimization) platform that tracks how
-brands are mentioned and cited across AI engines (ChatGPT, Gemini, Perplexity, Grok, Google AI).
+brands are mentioned and cited across AI engines (ChatGPT, Perplexity, Google AI Mode, Google AI Overview, Gemini, Copilot).
 Connect your AI agent to GEOly via the MCP server, then add this skill so it queries and reports
 your data accurately.
 
