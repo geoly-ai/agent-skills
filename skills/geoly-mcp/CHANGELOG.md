@@ -4,6 +4,20 @@ All notable changes to the `geoly-mcp` agent skill.
 
 ## 0.5.3
 
+- **`get_prompt_mention_rates` gains `sort_by` / `sort_order` / `offset` / `topic_ids`** (plus a
+  `topic_id` single-id alias) and returns `total` with an echo of the paging and sort arguments.
+  A user report: `offset=100` and `offset=0` returned the same 100 rows, `sort_by=mentionRate&sort_order=desc`
+  returned 100 rows that were all zero, and `topic_id` did not filter — those keys were not in the
+  tool's schema and were being silently dropped. Note the default is still **rankedRate ascending =
+  blind spots first**, so the first page is *expected* to be zeros; pass `sort_order=desc` for the
+  prompts where the brand is mentioned most. Topic ids come from `get_topic_list` / `get_brand_context`;
+  the 50-id cap applies to `topic_ids` **merged with** `topic_id` and de-duplicated, and going over it
+  returns an error rather than quietly dropping the extra topic.
+- **Unknown arguments are now rejected instead of silently dropped** on MCP, Sidekick and the Agent
+  API. Calling a tool with a parameter it does not have returns an error naming the unknown keys and
+  listing the accepted parameter names, rather than running the call as if the parameter had been
+  given. `org_id` / `brand_id` stay accepted everywhere (ignored by the tools that are not
+  brand-scoped). The only JSON-schema change is `additionalProperties: false`.
 - **`get_competitor_list` is a paged envelope** — `{ rows[], total, page, page_size, total_pages,
   counts {tracked, suggested, removed}, names_mode }` instead of one flat array. A user report:
   53 entities × up to 200 spellings each blew through the 60k output cap and the generic
@@ -17,6 +31,29 @@ All notable changes to the `geoly-mcp` agent skill.
 - Truncation messages (`_message` on `_truncated` results) now name **that tool's** narrowing
   parameters instead of the old fixed "time_range, platform, domain" text, which most tools
   do not have.
+- **`get_prompt_list` gains `compact=true`** (slim rows: id, text, country, isActive, topicName,
+  tags, createdAt, recordsCount, visibility, mentionRate, citationRate) so a 100-row page fits
+  the output cap — the way to enumerate / export every prompt (a full row is ~1.2KB, only ~45
+  fit; the page is flagged `_truncated` when cut). Paging is now a total order (sort key, then
+  createdAt, then id): bulk-imported prompts share one createdAt and used to overlap across pages.
+- **`org_id` / `brand_id` are accepted in every mode.** A single-org token passing another org's
+  `org_id` now gets an explicit error instead of the request silently landing on its own org.
+- **Numeric parameters accept numeric strings** ("2" → 2 — only numeric strings; null / booleans /
+  blank strings are still rejected) on MCP, Sidekick and the Agent API;
+  the JSON schema is unchanged. The hosted Agent API also now validates arguments and applies
+  defaults before running a tool (it used to hand the model's raw JSON to the handler).
+- **Citations catch up with the 2026-09-04 page redesign** (`/sources/citations`, domains tab):
+  `get_citation_overview` gains `board` — the page's own read model (`totals`, `you {share, rank}`,
+  `movers {top, new, up, down}`, `enteredTop20` / `biggestDrop`, `trend` top-5 + you,
+  `typeShare`, `coverage`, `prevReady`) and the page filters `topic_ids` / `competitor_ids`
+  (with those set the response is `{ board }` only). `stats` is unchanged for existing callers;
+  `stats.trend.citations` (half-window vs half-window) is deprecated in favour of `board.movers`.
+- **New: `list_citation_domains`** — the page's domain table (per-domain `prevCitations` /
+  `deltaPct` / `isNew`, `selfMentioned`, mentioned `brands[]`, `search`, `type`, `sort`,
+  paging up to 100) and its **content-gap switch** (`gap_only=true`: a registered competitor is
+  mentioned in answers citing the domain and you are not). `get_content_opportunities` is
+  deprecated: the page section it mirrored was removed in the redesign; the name keeps its old
+  semantics and price.
 
 ## 0.5.2
 

@@ -172,6 +172,11 @@ public/report tools) and paginate (`currentPage == totalPages`) instead of assum
   - **single** (one org, one brand, or brand-bound token) → brand tools auto-resolve; just call them.
   - **multi-brand** (one org, many brands) → first `list_brands`, then pass `brand_id`.
   - **multi-org** (several orgs) → first `list_organizations`, then `list_brands`, then pass IDs.
+  - `org_id` / `brand_id` are accepted by every brand tool in every mode (0.5.3). A token that
+    cannot reach the requested org/brand gets an explicit error — it never silently falls back to
+    its own default brand. If you see "cannot access org_id …", the token was consented for one
+    org only: re-consent with all organizations (or use a token for that org).
+  - Numeric parameters (`page`, `page_size`, `limit`, …) also accept numeric strings ("2").
   - In every mode, the first brand call of a session is `get_brand_context` (free, one shot):
     brand + org + today + platforms-with-data + topics + competitors + data window + credits.
 - **Public discovery flow** (any cross-brand / `get_public_*` work): **① `get_public_data_window`
@@ -335,7 +340,8 @@ decide by what you have:**
 | "Which queries never mention us" (blind spots) | `get_prompt_mention_rates` |
 | Citation **domain distribution / ownership** | `get_citation_overview` (counts URLs, not records; window = N whole +08 calendar days + today on the citation-creation axis — read `caliber` + `window` from the response) |
 | One domain / one page deep-dive | `get_domain_detail` / `get_page_detail` (same `caliber` + `window` contract) / `get_url_reference_detail` |
-| Content gaps for a domain | `get_content_opportunities` |
+| The cited-domain table: per-domain delta, mentioned brands, "mentions you", search / sort / paging | `list_citation_domains` (same read model as the page) |
+| Content gaps (competitor cited there, you not) | `list_citation_domains` with `gap_only=true` (`get_content_opportunities` is deprecated — old semantics, not the page) |
 | Standing **vs competitors** | `get_brand_board` (**entity caliber** — the in-app /performance board: confirmed competitors, `visibility` = mentioned ÷ completed answers, same formula for you; add `topic_ids`/`country` for the scoped entity set, fail-closed) · `get_platform_matrix` `dimension=competitor` (legacy discovered-brand record-weighted — not headline; `get_competitor_overview` is its deprecated alias, same shape) |
 | How AI *describes* the brand (verbatim) | `get_brand_mention_samples`; vs rivals → `get_competitor_cooccurrence` |
 | Topic-level analysis | `get_topic_list` (ids, free) → `get_topic_analytics` (pass `topic_ids`) or `query_analytics` `topic_citations_daily` for day-level topic trends |
