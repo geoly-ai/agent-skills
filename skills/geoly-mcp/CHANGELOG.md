@@ -2,6 +2,19 @@
 
 All notable changes to the `geoly-mcp` agent skill.
 
+## 0.8.0
+
+- **New tool `get_shopping_performance`** — the in-app AI Products page (`/shopping`): how your products show up in AI shopping cards on ChatGPT and Google AI Mode. Required `view`: `overview` (trigger rate, your appearance rate and shelf share, the brand board, seller board and prompts where you are absent), `products` (every product title seen; `own_only`, `search`, `sort`, `page`), `brand_products` (one brand's products, `brand_key` from `overview`) and `absent_prompts` (paged). Same read models as the page; boards are top-N, quote the `*Total` fields.
+- **`get_verdict` gains `view="matrix"` and `view="quotes"`** — the AI Verdict page's attribute × brand matrix (per aspect, positive / negative / neutral votes for you and each tracked competitor; `aspectId` feeds the other views) and its quotes drawer (verbatim sentences filtered by `aspect_id` / `polarity` / `entity_id` or `tracked_brand_id` / `q`, paged). `aspect_id` and `q` are now shared parameters (sources / matrix / quotes). An empty matrix comes with `emptyReason` (the page shows an empty comparison too) — not "no opinions". Permissions: `matrix` needs read access to the competitor resource; `quotes` also returns the prompt text and the domains each answer cited, so it needs competitor, prompt **and** citation read — a token without one of them cannot use `quotes` (the other views still work).
+- **`get_brand_context` marks retired platforms and stopped monitoring**: platform rows gain `retired` and `data_until` (Perplexity, Copilot), and `data_window` gains `days_behind` (≥ 2 = monitoring stopped, with a note). Never suggest reconnecting a retired platform.
+- `display_data` / `display_chart`: when both `rows` and `source_ref` are passed, `rows` win (before, `rows` were silently dropped).
+- Tool count: up to 55 per token (48 on a read-only multi-org connection).
+
+## 0.7.7
+
+- **`isBrandMention` now means "this citation is on your own website"** on `get_prompt_citations` and `get_prompt_record_detail` (`is_brand_mention` on `GET /api/v1/records/{id}`). It is decided when you read, by the same rule as `citationRate`: the citation's registrable domain is one of the domains configured on your own tracked brand, and attached shopping / navigation links (`link_attached`) are false. It used to be true whenever the URL, title, description or link text contained your brand name or domain, so third-party reviews, Reddit threads and Google redirect links were flagged. Expect far fewer `true` rows, mostly on Gemini, AI Mode and AI Overview. Past answers follow the new rule too. A group or sister site reads false until it is added to your own brand's domains.
+- **`get_audit_detail` `citationInsights.brandMentions`** follows the same rule: when the audited domain is your own (a subdomain counts) it is `totalCitations` minus attached shopping / navigation links, and when it is not it is 0.
+
 ## 0.7.6
 
 - **In-app page links moved to new paths** (the app's menu redesign). Links the server gives you now use: `/overview` (was `/performance`), `/answers` (was `/performance/answers`), `/perception` (was `/performance/verdict`), `/shopping` (was `/performance/shopping`), `/query-fanouts` (was `/sources/queries`), `/my-website/ai-traffic` (was `/sources/traffic`), `/agent-readiness` (was `/tools/agent-ready`), `/ai-explorer` (was `/tools/ai-explorer`), and `/explore` · `/explore/search` · `/explore/sources` · `/explore/shopping` · `/explore/ads` (were `/industry/explore`, `/industry/search`, `/industry/sources`, `/industry/shopping`, `/industry/ads`). `/prompts`, `/sources/citations`, `/audit`, `/integrations/*` and `/settings/*` are unchanged. Old links still redirect to the new pages, so links already shared keep working. Tool names, inputs and outputs are unchanged.
