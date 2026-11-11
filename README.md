@@ -1,7 +1,7 @@
 # GEOly Agent Skills
 
 Agent skills that teach AI agents to use the **[GEOly](https://www.geoly.ai) MCP server**
-correctly — picking the right tool, following the org/brand discovery flow, quoting the right
+correctly — picking the right tool, following the org/project discovery flow, quoting the right
 KPI caliber, and avoiding metric-definition pitfalls.
 
 [GEOly](https://www.geoly.ai) is a GEO (Generative Engine Optimization) platform that tracks how
